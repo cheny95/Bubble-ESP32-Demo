@@ -1,0 +1,122 @@
+
+
+globals:
+  - id: count
+    type: int
+    initial_value: '30'
+    restore_value: yes
+
+number:
+  - platform: template
+    name: 泡沫使用次数
+    min_value: 0
+    max_value: 1000
+    step: 1
+    restore_value: true
+    optimistic: true
+    mode: box
+    id: bubblenumber
+    icon: "mdi:chart-bubble"
+    on_value_range:
+      above: !lambda 'return id(count);'
+      then:
+        - delay: 60s
+        - switch.turn_on: relay2
+  - platform: template
+    name: "MixNumber"
+    min_value: 0
+    max_value: 1000
+    step: 1
+    restore_value: true
+    optimistic: true
+    initial_value: 30
+    mode: box
+    id: mixnumber
+    icon: "mdi:counter"
+    on_value:
+      then:
+        - globals.set:
+            id: count
+            value: !lambda "return x;"
+            
+switch:
+  - platform: gpio
+    pin:
+      number: 25
+      inverted: true
+    name: 泡沫
+    id: relay1
+    icon: "mdi:chart-bubble"
+    restore_mode: ALWAYS_OFF
+    interlock: [relay2]
+    on_turn_on:
+      then:
+        - delay: 500ms
+        - switch.turn_off: relay1
+        - number.increment: bubblenumber   
+
+  - platform: gpio
+    pin:
+      number: 26
+      inverted: true
+    name: bubble 加液
+    id: relay2
+    icon: "mdi:cup-water"
+    restore_mode: ALWAYS_OFF
+    interlock: [relay1]
+    on_turn_on:
+      then:
+        - delay: 500ms
+        - switch.turn_off: relay2  
+        - number.set:
+            id: bubblenumber
+            value: 0
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 18
+      mode:
+        input: true
+        pullup: true
+      inverted: True  
+    name: Bubble Button
+    id: button1
+    icon: mdi:gesture-tap-button
+    device_class: opening
+    filters:
+      - delayed_on_off: 100ms    
+    on_press:
+      if:
+        condition:
+          for:
+            time: 5s
+            condition:
+              switch.is_off: relay1
+        then:
+          - number.increment: bubblenumber
+  - platform: gpio
+    pin:
+      number: 19
+      mode:
+        input: true
+        pullup: true
+      inverted: True  
+    name: Mix Button
+    id: button2
+    icon: mdi:gesture-tap-button
+    device_class: opening
+    filters:
+      - delayed_on_off: 100ms     
+    on_press:
+      if:
+        condition:
+          for:
+            time: 5s
+            condition:
+              switch.is_off: relay2
+        then:
+          - number.set:
+              id: bubblenumber
+              value: 0
+  
