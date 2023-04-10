@@ -1,5 +1,8 @@
 # Bubble-ESP32-Demo
 泡沫盾机器esp32接入HomeAssistant参考代码
+
+![yaofan](https://user-images.githubusercontent.com/6293952/196037499-17ef6aec-9fe4-4fc2-a4ac-811a12bfb380.jpg)
+
 #### ESP32固件是：bubble.yml
 
 #### 语音板文件是：asr.hd 通过天问打开
@@ -13,3 +16,11 @@
 ![WX20230410-203444@2x](https://user-images.githubusercontent.com/6293952/230902454-4ff6d308-2cec-4250-94a6-ff2b07b3c35f.png)
 
 ![WX20230410-203719@2x](https://user-images.githubusercontent.com/6293952/230902705-afed9933-f521-40f8-a7b4-f68abbce3ec3.png)
+
+
+## 交流
+- QQ群：198841186
+
+- 微信群：(添加该机器人，发送“进群”会自动发送邀请链接）
+  
+![xiaomi miot weixin group](https://user-images.githubusercontent.com/4549099/161735971-0540ce1c-eb49-4aff-8cb3-3bdad15e22f7.png)
