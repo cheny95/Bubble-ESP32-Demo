@@ -1,4 +1,83 @@
+substitutions:
+#  devicename: esp32_daikin    
+  upper_devicename: 智能泡沫盾    
 
+esphome:
+  name: "foam"
+  includes:
+    - "read_uart.h"
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: "12345678"
+
+wifi:
+  ssid: undefined
+  password: chan1234
+  ap:
+    ssid: "Foam Machine Host"
+
+
+web_server:
+  port: 80
+
+logger:
+  #level: NONE #makes uart stream available in esphome logstream
+  #baud_rate: 9600 #disable logging over uart
+
+# bluetooth_proxy:  #需要蓝牙代理功能可以打开
+#   active: true
+
+uart:
+- id: asr_uart
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 9600
+
+sensor:
+  - platform: wifi_signal
+    name: ${upper_devicename} WiFi信号
+    update_interval: 300s
+    id: wifi_id
+  - platform: uptime
+    name: ${upper_devicename} 在线时长
+    update_interval: 10s
+    unit_of_measurement: "秒"
+
+    
+
+text_sensor:
+  - platform: wifi_info
+    ssid:
+      name: ${upper_devicename} 无线信号
+      icon: mdi:signal-variant
+      id: wifi_ssid
+    ip_address:
+      name: ${upper_devicename} IP
+      icon: mdi:ip-network
+    mac_address:
+      name: ${upper_devicename} MAC
+      icon: mdi:wifi-marker
+  - platform: custom
+    lambda: |-
+      auto my_asrpro = new UartReadLineSensor(id(asr_uart));
+      App.register_component(my_asrpro);
+      return {my_asrpro};
+    text_sensors:
+      name: "${upper_devicename} 语音命令"
+      icon: mdi:microphone
+
+
+button:
+  - platform: restart
+    name: ${upper_devicename} 重启
 
 globals:
   - id: count
@@ -8,7 +87,7 @@ globals:
 
 number:
   - platform: template
-    name: 泡沫使用次数
+    name: Bubble Number
     min_value: 0
     max_value: 1000
     step: 1
@@ -23,7 +102,7 @@ number:
         - delay: 60s
         - switch.turn_on: relay2
   - platform: template
-    name: "MixNumber"
+    name: "Add Water Number"
     min_value: 0
     max_value: 1000
     step: 1
@@ -38,13 +117,13 @@ number:
         - globals.set:
             id: count
             value: !lambda "return x;"
-            
+
 switch:
   - platform: gpio
     pin:
-      number: 25
+      number: 13
       inverted: true
-    name: 泡沫
+    name: Bubble Action
     id: relay1
     icon: "mdi:chart-bubble"
     restore_mode: ALWAYS_OFF
@@ -57,9 +136,9 @@ switch:
 
   - platform: gpio
     pin:
-      number: 26
+      number: 12
       inverted: true
-    name: bubble 加液
+    name: Add Mix Water
     id: relay2
     icon: "mdi:cup-water"
     restore_mode: ALWAYS_OFF
@@ -71,16 +150,15 @@ switch:
         - number.set:
             id: bubblenumber
             value: 0
-
 binary_sensor:
   - platform: gpio
     pin:
-      number: 18
+      number: 14
       mode:
         input: true
         pullup: true
       inverted: True  
-    name: Bubble Button
+    name: Bubble Status
     id: button1
     icon: mdi:gesture-tap-button
     device_class: opening
@@ -97,12 +175,12 @@ binary_sensor:
           - number.increment: bubblenumber
   - platform: gpio
     pin:
-      number: 19
+      number: 27
       mode:
         input: true
         pullup: true
       inverted: True  
-    name: Mix Button
+    name: Mix Water Status
     id: button2
     icon: mdi:gesture-tap-button
     device_class: opening
